@@ -1,0 +1,196 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #050811;
+  color: #e6eaf2;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0f1e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid #4d8fff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* High contrast mode */
+.high-contrast {
+  --hc-bg: #000000;
+  --hc-fg: #ffffff;
+  --hc-accent: #ffff00;
+  --hc-border: #ffffff;
+}
+
+.high-contrast body,
+.high-contrast .bg-ink-950,
+.high-contrast .bg-ink-900,
+.high-contrast .bg-ink-800 {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .text-ink-300,
+.high-contrast .text-ink-400,
+.high-contrast .text-ink-200 {
+  color: #ffffff !important;
+}
+
+.high-contrast .border-ink-700,
+.high-contrast .border-ink-800 {
+  border-color: #ffffff !important;
+}
+
+.high-contrast .bg-nexus-500,
+.high-contrast .bg-pitch-500,
+.high-contrast .bg-flame-500 {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #1f6fff;
+  color: white;
+  padding: 8px 16px;
+  z-index: 100;
+  border-radius: 0 0 8px 0;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(31, 111, 255, 0.15);
+}
+
+.glass-strong {
+  background: rgba(10, 15, 30, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(31, 111, 255, 0.2);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #4d8fff 0%, #00e890 50%, #ff8c00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: gradient 8s ease infinite;
+}
+
+/* Animated grid background */
+.bg-stadium-grid {
+  background-image:
+    linear-gradient(rgba(31, 111, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(31, 111, 255, 0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Heatmap glow */
+.heatmap-glow {
+  filter: blur(8px);
+  opacity: 0.7;
+}
+
+/* Shimmer effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(31, 111, 255, 0) 0%,
+    rgba(31, 111, 255, 0.2) 50%,
+    rgba(31, 111, 255, 0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+/* Pulse ring */
+.pulse-ring {
+  position: relative;
+}
+
+.pulse-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.4;
+  animation: ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print friendly */
+@media print {
+  .no-print {
+    display: none;
+  }
+}
