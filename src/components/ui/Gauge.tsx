@@ -14,7 +14,7 @@ export function Gauge({ value, max = 100, size = 120, label, unit = '%', color =
   const offset = circumference * (1 - pct * 0.75);
   const center = size / 2;
   return (
-    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }} role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={max} aria-label={label}>
       <svg width={size} height={size} className="-rotate-[135deg]">
         <circle
           cx={center}

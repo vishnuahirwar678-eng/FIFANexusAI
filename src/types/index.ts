@@ -250,3 +250,47 @@ export interface OperationalInsight {
   recommendation?: string;
 }
 
+export interface NavRoute {
+  id: string;
+  name: string;
+  from: string;
+  to: string;
+  distance: number;
+  estimatedTime: number;
+  type: 'standard' | 'accessible' | 'emergency';
+  congestion: number;
+  steps: { instruction: string; distance: number; icon: string }[];
+  accessible: boolean;
+}
+
+export interface AccessibilityFeature {
+  id: string;
+  type: 'wheelchair' | 'elevator' | 'restroom' | 'seating' | 'parking' | 'sign-language' | 'sensory' | 'service-animal';
+  label: string;
+  location: string;
+  status: 'available' | 'in-use' | 'maintenance';
+  count: number;
+}
+
+export interface TranslationEntry {
+  id: string;
+  sourceText: string;
+  sourceLang: string;
+  translations: Record<string, string>;
+  category: 'announcement' | 'instruction' | 'emergency' | 'wayfinding' | 'general';
+  voiceAvailable: boolean;
+  usageCount: number;
+}
+
+export interface AlignmentEntry {
+  id: string;
+  requirement: string;
+  feature: string;
+  aiComponent: string;
+  userBenefit: string;
+  realWorldImpact: string;
+  kpi: string;
+  kpiValue: string;
+  status: 'fully-implemented' | 'partially-implemented';
+}
+

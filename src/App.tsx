@@ -1,26 +1,63 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState, type ReactNode } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/useAuth';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Landing } from './components/landing/Landing';
 import { SignIn } from './components/auth/SignIn';
 import { AppShell, type ViewId } from './components/shell/AppShell';
-import { CommandCenter } from './components/views/CommandCenter';
-import { DigitalTwin } from './components/views/DigitalTwin';
-import { FanCopilot } from './components/views/FanCopilot';
-import { CrowdIntelligence } from './components/views/CrowdIntelligence';
-import { VolunteerCopilot } from './components/views/VolunteerCopilot';
-import { SmartTransport } from './components/views/SmartTransport';
-import { SustainabilityIntelligence } from './components/views/SustainabilityIntelligence';
-import { TestingDashboard } from './components/views/TestingDashboard';
-import { SecurityCenter } from './components/views/SecurityCenter';
-import { ExplainableAI } from './components/views/ExplainableAI';
-import { OfflineEmergencyMode } from './components/views/OfflineEmergencyMode';
-import { MonitoringObservability } from './components/views/MonitoringObservability';
-import { KpiRoiDashboard } from './components/views/KpiRoiDashboard';
-import { OperationalIntelligence } from './components/views/OperationalIntelligence';
+
+const CommandCenter = lazy(() => import('./components/views/CommandCenter').then((m) => ({ default: m.CommandCenter })));
+const DigitalTwin = lazy(() => import('./components/views/DigitalTwin').then((m) => ({ default: m.DigitalTwin })));
+const FanCopilot = lazy(() => import('./components/views/FanCopilot').then((m) => ({ default: m.FanCopilot })));
+const CrowdIntelligence = lazy(() => import('./components/views/CrowdIntelligence').then((m) => ({ default: m.CrowdIntelligence })));
+const VolunteerCopilot = lazy(() => import('./components/views/VolunteerCopilot').then((m) => ({ default: m.VolunteerCopilot })));
+const SmartTransport = lazy(() => import('./components/views/SmartTransport').then((m) => ({ default: m.SmartTransport })));
+const SustainabilityIntelligence = lazy(() => import('./components/views/SustainabilityIntelligence').then((m) => ({ default: m.SustainabilityIntelligence })));
+const TestingDashboard = lazy(() => import('./components/views/TestingDashboard').then((m) => ({ default: m.TestingDashboard })));
+const SecurityCenter = lazy(() => import('./components/views/SecurityCenter').then((m) => ({ default: m.SecurityCenter })));
+const ExplainableAI = lazy(() => import('./components/views/ExplainableAI').then((m) => ({ default: m.ExplainableAI })));
+const OfflineEmergencyMode = lazy(() => import('./components/views/OfflineEmergencyMode').then((m) => ({ default: m.OfflineEmergencyMode })));
+const MonitoringObservability = lazy(() => import('./components/views/MonitoringObservability').then((m) => ({ default: m.MonitoringObservability })));
+const KpiRoiDashboard = lazy(() => import('./components/views/KpiRoiDashboard').then((m) => ({ default: m.KpiRoiDashboard })));
+const OperationalIntelligence = lazy(() => import('./components/views/OperationalIntelligence').then((m) => ({ default: m.OperationalIntelligence })));
+const SmartNavigation = lazy(() => import('./components/views/SmartNavigation').then((m) => ({ default: m.SmartNavigation })));
+const AccessibilityCenter = lazy(() => import('./components/views/AccessibilityCenter').then((m) => ({ default: m.AccessibilityCenter })));
+const MultilingualCenter = lazy(() => import('./components/views/MultilingualCenter').then((m) => ({ default: m.MultilingualCenter })));
+const ChallengeAlignment = lazy(() => import('./components/views/ChallengeAlignment').then((m) => ({ default: m.ChallengeAlignment })));
 
 type Screen = 'landing' | 'signin' | 'app';
+
+const VIEW_LOADERS: Record<ViewId, () => ReactNode> = {
+  'command': () => <CommandCenter />,
+  'digital-twin': () => <DigitalTwin />,
+  'fan-copilot': () => <FanCopilot />,
+  'crowd': () => <CrowdIntelligence />,
+  'volunteer': () => <VolunteerCopilot />,
+  'transport': () => <SmartTransport />,
+  'sustainability': () => <SustainabilityIntelligence />,
+  'security': () => <SecurityCenter />,
+  'testing': () => <TestingDashboard />,
+  'explainable-ai': () => <ExplainableAI />,
+  'offline-emergency': () => <OfflineEmergencyMode />,
+  'monitoring': () => <MonitoringObservability />,
+  'kpi-roi': () => <KpiRoiDashboard />,
+  'operational-intelligence': () => <OperationalIntelligence />,
+  'navigation': () => <SmartNavigation />,
+  'accessibility': () => <AccessibilityCenter />,
+  'multilingual': () => <MultilingualCenter />,
+  'alignment': () => <ChallengeAlignment />,
+};
+
+function ViewLoader() {
+  return (
+    <div className="flex items-center justify-center py-20" role="status" aria-live="polite">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-10 h-10 border-4 border-nexus-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-ink-400">Loading dashboard...</p>
+      </div>
+    </div>
+  );
+}
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -44,11 +81,7 @@ function AppContent() {
   };
 
   if (screen === 'landing') {
-    return (
-      <>
-        <Landing onEnter={enterApp} onSignIn={() => setScreen('signin')} />
-      </>
-    );
+    return <Landing onEnter={enterApp} onSignIn={() => setScreen('signin')} />;
   }
 
   if (screen === 'signin') {
@@ -61,25 +94,16 @@ function AppContent() {
 
   return (
     <AppShell current={view} onNavigate={setView} onExit={() => setScreen('landing')}>
-      {view === 'command' && <CommandCenter />}
-      {view === 'digital-twin' && <DigitalTwin />}
-      {view === 'fan-copilot' && <FanCopilot />}
-      {view === 'crowd' && <CrowdIntelligence />}
-      {view === 'volunteer' && <VolunteerCopilot />}
-      {view === 'transport' && <SmartTransport />}
-      {view === 'sustainability' && <SustainabilityIntelligence />}
-      {view === 'security' && <SecurityCenter />}
-      {view === 'testing' && <TestingDashboard />}
-      {view === 'explainable-ai' && <ExplainableAI />}
-      {view === 'offline-emergency' && <OfflineEmergencyMode />}
-      {view === 'monitoring' && <MonitoringObservability />}
-      {view === 'kpi-roi' && <KpiRoiDashboard />}
-      {view === 'operational-intelligence' && <OperationalIntelligence />}
+      <ErrorBoundary>
+        <Suspense fallback={<ViewLoader />}>
+          {VIEW_LOADERS[view]()}
+        </Suspense>
+      </ErrorBoundary>
     </AppShell>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
@@ -88,5 +112,3 @@ function App() {
     </ErrorBoundary>
   );
 }
-
-export default App;

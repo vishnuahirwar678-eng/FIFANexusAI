@@ -3,7 +3,7 @@ import {
   Activity, LayoutDashboard, Boxes, Heart, Users, Hand, Bus, Leaf,
   ShieldCheck, FlaskConical, Menu, X, Bell, Search, Globe,
   Accessibility, Sun, Volume2, ChevronDown, LogOut, User as UserIcon, Radio,
-  Brain, WifiOff, BarChart3,
+  Brain, WifiOff, BarChart3, Navigation, Target, Languages,
 } from 'lucide-react';
 import { useAuth } from '../../context/useAuth';
 import { AGENTS, LANGUAGES } from '../../lib/mock-data';
@@ -24,7 +24,11 @@ export type ViewId =
   | 'offline-emergency'
   | 'monitoring'
   | 'kpi-roi'
-  | 'operational-intelligence';
+  | 'operational-intelligence'
+  | 'navigation'
+  | 'accessibility'
+  | 'multilingual'
+  | 'alignment';
 
 interface NavItem {
   id: ViewId;
@@ -49,6 +53,10 @@ const NAV: NavItem[] = [
   { id: 'monitoring', label: 'Monitoring', icon: Activity, roles: ['commander', 'operations'] },
   { id: 'offline-emergency', label: 'Offline Emergency', icon: WifiOff, roles: ['commander', 'operations', 'security', 'volunteer'] },
   { id: 'testing', label: 'Testing Dashboard', icon: FlaskConical, roles: ['commander', 'operations'] },
+  { id: 'navigation', label: 'Indoor Navigation', icon: Navigation, roles: ['commander', 'operations', 'security', 'volunteer', 'fan'] },
+  { id: 'accessibility', label: 'Accessibility Center', icon: Accessibility, roles: ['commander', 'operations', 'volunteer', 'fan'] },
+  { id: 'multilingual', label: 'Multilingual AI', icon: Languages, roles: ['commander', 'operations', 'volunteer', 'fan'], badge: '8' },
+  { id: 'alignment', label: 'Challenge Alignment', icon: Target, roles: ['commander', 'operations'] },
 ];
 
 interface AppShellProps {

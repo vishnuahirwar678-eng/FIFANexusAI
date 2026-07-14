@@ -4,9 +4,10 @@ interface SparklineProps {
   width?: number;
   height?: number;
   fill?: boolean;
+  label?: string;
 }
 
-export function Sparkline({ data, color = '#4d8fff', width = 120, height = 36, fill = true }: SparklineProps) {
+export function Sparkline({ data, color = '#4d8fff', width = 120, height = 36, fill = true, label }: SparklineProps) {
   if (data.length === 0) return null;
   const max = Math.max(...data);
   const min = Math.min(...data);
@@ -21,7 +22,7 @@ export function Sparkline({ data, color = '#4d8fff', width = 120, height = 36, f
   const areaPath = `${path} L ${width},${height} L 0,${height} Z`;
   const gradientId = `spark-${color.replace('#', '')}`;
   return (
-    <svg width={width} height={height} className="overflow-visible">
+    <svg width={width} height={height} className="overflow-visible" role={label ? 'img' : undefined} aria-label={label}>
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.4" />

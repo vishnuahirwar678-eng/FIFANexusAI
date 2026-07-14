@@ -3,7 +3,7 @@ import { uid } from './utils';
 import { TRANSLATIONS } from './mock-data';
 
 const PROMPT_INJECTION_PATTERNS = [
-  /ignore (all |previous )?instructions/i,
+  /ignore .*(instructions|rules|prompts)/i,
   /disregard (the )?above/i,
   /you are now (a |an )?/i,
   /system prompt/i,
