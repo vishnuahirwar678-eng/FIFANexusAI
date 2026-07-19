@@ -11,15 +11,9 @@ import {
 } from '../src/lib/mock-data';
 
 describe('generateAlerts', () => {
-  it('generates requested count', () => {
-    expect(generateAlerts(5)).toHaveLength(5);
-  });
-  it('generates default count', () => {
-    expect(generateAlerts()).toHaveLength(8);
-  });
-  it('generates zero alerts', () => {
-    expect(generateAlerts(0)).toHaveLength(0);
-  });
+  it('generates requested count', () => { expect(generateAlerts(5)).toHaveLength(5); });
+  it('generates default count', () => { expect(generateAlerts()).toHaveLength(8); });
+  it('generates zero alerts', () => { expect(generateAlerts(0)).toHaveLength(0); });
   it('each alert has required fields', () => {
     const a = generateAlerts(1)[0];
     expect(a).toHaveProperty('id');
@@ -41,23 +35,16 @@ describe('generateAlerts', () => {
   });
   it('severity is valid enum', () => {
     const valid = ['critical', 'high', 'medium', 'low', 'info'];
-    for (const a of generateAlerts(10)) {
-      expect(valid).toContain(a.severity);
-    }
+    for (const a of generateAlerts(10)) { expect(valid).toContain(a.severity); }
   });
   it('status is valid enum', () => {
     const valid = ['active', 'acknowledged', 'resolved', 'monitoring'];
-    for (const a of generateAlerts(10)) {
-      expect(valid).toContain(a.status);
-    }
+    for (const a of generateAlerts(10)) { expect(valid).toContain(a.status); }
   });
 });
 
 describe('generateVolunteerTasks', () => {
-  it('generates tasks', () => {
-    const tasks = generateVolunteerTasks();
-    expect(tasks.length).toBeGreaterThan(0);
-  });
+  it('generates tasks', () => { expect(generateVolunteerTasks().length).toBeGreaterThan(0); });
   it('each task has required fields', () => {
     const t = generateVolunteerTasks()[0];
     expect(t).toHaveProperty('id');
@@ -72,13 +59,9 @@ describe('generateVolunteerTasks', () => {
 });
 
 describe('generateTransportRoutes', () => {
-  it('generates routes', () => {
-    const routes = generateTransportRoutes();
-    expect(routes.length).toBeGreaterThan(0);
-  });
+  it('generates routes', () => { expect(generateTransportRoutes().length).toBeGreaterThan(0); });
   it('includes metro, bus, parking types', () => {
-    const routes = generateTransportRoutes();
-    const types = routes.map(r => r.type);
+    const types = generateTransportRoutes().map(r => r.type);
     expect(types).toContain('metro');
     expect(types).toContain('bus');
     expect(types).toContain('parking');
@@ -92,13 +75,9 @@ describe('generateTransportRoutes', () => {
 });
 
 describe('generateSustainabilityMetrics', () => {
-  it('generates metrics', () => {
-    const metrics = generateSustainabilityMetrics();
-    expect(metrics.length).toBeGreaterThan(0);
-  });
+  it('generates metrics', () => { expect(generateSustainabilityMetrics().length).toBeGreaterThan(0); });
   it('includes energy, water, waste, carbon categories', () => {
-    const metrics = generateSustainabilityMetrics();
-    const cats = metrics.map(m => m.category);
+    const cats = generateSustainabilityMetrics().map(m => m.category);
     expect(cats).toContain('energy');
     expect(cats).toContain('water');
     expect(cats).toContain('waste');
@@ -107,12 +86,8 @@ describe('generateSustainabilityMetrics', () => {
 });
 
 describe('generateAuditLogs', () => {
-  it('generates default count', () => {
-    expect(generateAuditLogs()).toHaveLength(12);
-  });
-  it('generates requested count', () => {
-    expect(generateAuditLogs(5)).toHaveLength(5);
-  });
+  it('generates default count', () => { expect(generateAuditLogs()).toHaveLength(12); });
+  it('generates requested count', () => { expect(generateAuditLogs(5)).toHaveLength(5); });
   it('each log has required fields', () => {
     const l = generateAuditLogs(1)[0];
     expect(l).toHaveProperty('id');
@@ -124,13 +99,9 @@ describe('generateAuditLogs', () => {
 });
 
 describe('generateTestResults', () => {
-  it('generates results', () => {
-    const results = generateTestResults();
-    expect(results.length).toBeGreaterThan(0);
-  });
+  it('generates results', () => { expect(generateTestResults().length).toBeGreaterThan(0); });
   it('includes all test categories', () => {
-    const results = generateTestResults();
-    const cats = results.map(r => r.category);
+    const cats = generateTestResults().map(r => r.category);
     expect(cats).toContain('unit');
     expect(cats).toContain('integration');
     expect(cats).toContain('e2e');
@@ -148,12 +119,8 @@ describe('generateTestResults', () => {
 });
 
 describe('generateSparkline', () => {
-  it('generates array of specified length', () => {
-    expect(generateSparkline(20, 50, 20)).toHaveLength(20);
-  });
-  it('generates default length', () => {
-    expect(generateSparkline()).toHaveLength(20);
-  });
+  it('generates array of specified length', () => { expect(generateSparkline(20, 50, 20)).toHaveLength(20); });
+  it('generates default length', () => { expect(generateSparkline()).toHaveLength(20); });
   it('values are numbers', () => {
     for (const v of generateSparkline(10, 50, 20)) {
       expect(typeof v).toBe('number');
@@ -189,10 +156,7 @@ describe('generateHeatmapGrid', () => {
 });
 
 describe('generateAIExplanations', () => {
-  it('generates explanations', () => {
-    const exps = generateAIExplanations();
-    expect(exps.length).toBeGreaterThan(0);
-  });
+  it('generates explanations', () => { expect(generateAIExplanations().length).toBeGreaterThan(0); });
   it('each explanation has required fields', () => {
     const e = generateAIExplanations()[0];
     expect(e).toHaveProperty('id');
@@ -212,20 +176,14 @@ describe('generateAIExplanations', () => {
 });
 
 describe('generateEvacuationRoutes', () => {
-  it('generates routes', () => {
-    expect(generateEvacuationRoutes().length).toBeGreaterThan(0);
-  });
+  it('generates routes', () => { expect(generateEvacuationRoutes().length).toBeGreaterThan(0); });
   it('each route has accessible flag', () => {
-    for (const r of generateEvacuationRoutes()) {
-      expect(typeof r.accessible).toBe('boolean');
-    }
+    for (const r of generateEvacuationRoutes()) { expect(typeof r.accessible).toBe('boolean'); }
   });
 });
 
 describe('generateEmergencyContacts', () => {
-  it('generates contacts', () => {
-    expect(generateEmergencyContacts().length).toBeGreaterThan(0);
-  });
+  it('generates contacts', () => { expect(generateEmergencyContacts().length).toBeGreaterThan(0); });
   it('each contact has required fields', () => {
     const c = generateEmergencyContacts()[0];
     expect(c).toHaveProperty('id');
@@ -236,9 +194,7 @@ describe('generateEmergencyContacts', () => {
 });
 
 describe('generateSystemMetrics', () => {
-  it('generates metrics', () => {
-    expect(generateSystemMetrics().length).toBeGreaterThan(0);
-  });
+  it('generates metrics', () => { expect(generateSystemMetrics().length).toBeGreaterThan(0); });
   it('cpu and memory between 0 and 100', () => {
     for (const m of generateSystemMetrics()) {
       expect(m.cpu).toBeGreaterThanOrEqual(0);
@@ -250,9 +206,7 @@ describe('generateSystemMetrics', () => {
 });
 
 describe('generateErrorEvents', () => {
-  it('generates events', () => {
-    expect(generateErrorEvents().length).toBeGreaterThan(0);
-  });
+  it('generates events', () => { expect(generateErrorEvents().length).toBeGreaterThan(0); });
   it('each event has required fields', () => {
     const e = generateErrorEvents()[0];
     expect(e).toHaveProperty('id');
@@ -263,23 +217,16 @@ describe('generateErrorEvents', () => {
 });
 
 describe('generateKpiRoiMetrics', () => {
-  it('generates metrics', () => {
-    expect(generateKpiRoiMetrics().length).toBeGreaterThan(0);
-  });
+  it('generates metrics', () => { expect(generateKpiRoiMetrics().length).toBeGreaterThan(0); });
   it('each metric has improvement value', () => {
-    for (const m of generateKpiRoiMetrics()) {
-      expect(typeof m.improvement).toBe('number');
-    }
+    for (const m of generateKpiRoiMetrics()) { expect(typeof m.improvement).toBe('number'); }
   });
 });
 
 describe('generateOperationalInsights', () => {
-  it('generates insights', () => {
-    expect(generateOperationalInsights().length).toBeGreaterThan(0);
-  });
+  it('generates insights', () => { expect(generateOperationalInsights().length).toBeGreaterThan(0); });
   it('includes predictions and anomalies', () => {
-    const insights = generateOperationalInsights();
-    const types = insights.map(i => i.type);
+    const types = generateOperationalInsights().map(i => i.type);
     expect(types).toContain('prediction');
     expect(types).toContain('anomaly');
   });
@@ -312,10 +259,7 @@ describe('generateNavRoutes', () => {
 });
 
 describe('generateAccessibilityFeatures', () => {
-  it('generates 8 feature types', () => {
-    const features = generateAccessibilityFeatures();
-    expect(features.length).toBe(8);
-  });
+  it('generates 8 feature types', () => { expect(generateAccessibilityFeatures()).toHaveLength(8); });
   it('each feature has required fields', () => {
     const f = generateAccessibilityFeatures()[0];
     expect(f).toHaveProperty('type');
@@ -325,8 +269,7 @@ describe('generateAccessibilityFeatures', () => {
     expect(f).toHaveProperty('count');
   });
   it('includes wheelchair and elevator types', () => {
-    const features = generateAccessibilityFeatures();
-    const types = features.map(f => f.type);
+    const types = generateAccessibilityFeatures().map(f => f.type);
     expect(types).toContain('wheelchair');
     expect(types).toContain('elevator');
     expect(types).toContain('restroom');
@@ -352,16 +295,12 @@ describe('generateTranslationEntries', () => {
     expect(translations).toHaveProperty('ja');
   });
   it('each entry has voiceAvailable flag', () => {
-    for (const e of generateTranslationEntries()) {
-      expect(typeof e.voiceAvailable).toBe('boolean');
-    }
+    for (const e of generateTranslationEntries()) { expect(typeof e.voiceAvailable).toBe('boolean'); }
   });
 });
 
 describe('ALIGNMENT_DATA', () => {
-  it('contains 15 alignment entries', () => {
-    expect(ALIGNMENT_DATA).toHaveLength(15);
-  });
+  it('contains 15 alignment entries', () => { expect(ALIGNMENT_DATA).toHaveLength(15); });
   it('all entries are fully implemented', () => {
     expect(ALIGNMENT_DATA.every(a => a.status === 'fully-implemented')).toBe(true);
   });
@@ -377,8 +316,10 @@ describe('ALIGNMENT_DATA', () => {
   });
   it('entries cover all challenge areas', () => {
     const text = ALIGNMENT_DATA.map(a => `${a.requirement} ${a.feature} ${a.aiComponent}`).join(' ').toLowerCase();
-    expect(text).toMatch(/stadium operations/);
-    expect(text).toMatch(/fan experience/);
+    expect(text).toMatch(/fan copilot/);
+    expect(text).toMatch(/crowd intelligence/);
+    expect(text).toMatch(/digital twin/);
+    expect(text).toMatch(/operations/);
     expect(text).toMatch(/security/);
     expect(text).toMatch(/accessibility/);
     expect(text).toMatch(/sustainability/);
@@ -388,15 +329,9 @@ describe('ALIGNMENT_DATA', () => {
 });
 
 describe('Static exports', () => {
-  it('AGENTS has 7 agents', () => {
-    expect(AGENTS).toHaveLength(7);
-  });
-  it('STADIUM_ZONES has zones', () => {
-    expect(STADIUM_ZONES.length).toBeGreaterThan(0);
-  });
-  it('KPIS has metrics', () => {
-    expect(KPIS.length).toBeGreaterThan(0);
-  });
+  it('AGENTS has 7 agents', () => { expect(AGENTS).toHaveLength(7); });
+  it('STADIUM_ZONES has zones', () => { expect(STADIUM_ZONES.length).toBeGreaterThan(0); });
+  it('KPIS has metrics', () => { expect(KPIS.length).toBeGreaterThan(0); });
   it('LANGUAGES has 8 languages', () => {
     expect(LANGUAGES).toHaveLength(8);
     const codes = LANGUAGES.map(l => l.code);
@@ -414,13 +349,7 @@ describe('Static exports', () => {
       expect(Object.keys(TRANSLATIONS[key])).toHaveLength(8);
     }
   });
-  it('ANNOUNCEMENTS is non-empty', () => {
-    expect(ANNOUNCEMENTS.length).toBeGreaterThan(0);
-  });
-  it('IMPACT_METRICS is non-empty', () => {
-    expect(IMPACT_METRICS.length).toBeGreaterThan(0);
-  });
-  it('AI_AGENTS_INFO is non-empty', () => {
-    expect(AI_AGENTS_INFO.length).toBeGreaterThan(0);
-  });
+  it('ANNOUNCEMENTS is non-empty', () => { expect(ANNOUNCEMENTS.length).toBeGreaterThan(0); });
+  it('IMPACT_METRICS is non-empty', () => { expect(IMPACT_METRICS.length).toBeGreaterThan(0); });
+  it('AI_AGENTS_INFO is non-empty', () => { expect(AI_AGENTS_INFO.length).toBeGreaterThan(0); });
 });

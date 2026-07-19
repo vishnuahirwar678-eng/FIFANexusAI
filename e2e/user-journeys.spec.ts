@@ -219,7 +219,7 @@ test.describe('Authentication Flows', () => {
   });
 
   test('full login-logout cycle for all 5 roles', async ({ page }) => {
-    for (const [role, creds] of Object.entries(DEMO)) {
+    for (const [, creds] of Object.entries(DEMO)) {
       await page.goto('/');
       await page.getByRole('button', { name: /sign in/i }).click();
       await page.getByLabel(/email/i).fill(creds.email);

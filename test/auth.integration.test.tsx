@@ -1,9 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import { AuthProvider, type AuthContextValue } from '../src/context/AuthContext';
 import { useAuth } from '../src/context/useAuth';
 import { DEMO_CREDENTIALS } from '../src/lib/demo-credentials';
 import type { UserRole } from '../src/types';
+
+// Mock Supabase to prevent real network calls during tests
+vi.mock('../src/lib/supabase', () => ({
+  isSupabaseConfigured: false,
+  supabase: null,
+}));
 
 // Helper to consume auth context for testing
 function AuthConsumer({ onAuth }: { onAuth: (v: AuthContextValue) => void }) {

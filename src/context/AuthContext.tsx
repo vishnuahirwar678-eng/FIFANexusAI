@@ -1,6 +1,7 @@
-import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useMemo, useState, type ReactNode } from 'react';
 import type { User, UserRole } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { validateEmail, validatePassword, logAuditEvent } from '../lib/security';
 
 export interface AuthContextValue {
   user: User | null;
@@ -77,23 +78,49 @@ const DEMO_USERS: Record<string, { password: string; user: User }> = {
 
 const STORAGE_KEY = 'nexus_auth_user';
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+function parseStoredUser(raw: string): User | null {
+  try {
+    return JSON.parse(raw) as User;
+  } catch {
+    return null;
+  }
+}
 
-  useEffect(() => {
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window === 'undefined') return null;
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-      }
+    if (!stored) return null;
+    const parsed = parseStoredUser(stored);
+    if (!parsed) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
     }
-    setLoading(false);
+    return parsed;
+  });
+  const [loading, setLoading] = useState(false);
+
+  const persistUser = useCallback((u: User | null) => {
+    setUser(u);
+    if (u) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
   }, []);
 
   const signIn = async (email: string, password: string): Promise<{ error: string | null }> => {
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      logAuditEvent({ action: 'login', resource: 'auth', status: 'denied', details: 'invalid email' });
+      return { error: emailCheck.error ?? 'Invalid email' };
+    }
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+      logAuditEvent({ action: 'login', resource: 'auth', status: 'denied', details: 'invalid password' });
+      return { error: passwordCheck.error ?? 'Invalid password' };
+    }
+
     setLoading(true);
     try {
       if (isSupabaseConfigured && supabase) {
@@ -101,11 +128,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) {
           const demo = DEMO_USERS[email.toLowerCase()];
           if (demo && demo.password === password) {
-            setUser(demo.user);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(demo.user));
+            persistUser(demo.user);
+            logAuditEvent({ userId: demo.user.id, action: 'login', resource: 'auth', status: 'success', details: 'demo login' });
             return { error: null };
           }
-          return { error: error.message };
+          logAuditEvent({ action: 'login', resource: 'auth', status: 'denied', details: 'supabase auth failed' });
+          return { error: 'Invalid credentials. Try commander@fifanexus.ai / nexus2026' };
         }
         if (data.user) {
           const role: UserRole = email.includes('commander') ? 'commander'
@@ -120,29 +148,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             role,
             avatar: (data.user.email?.slice(0, 2) ?? 'U').toUpperCase(),
           };
-          setUser(u);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+          persistUser(u);
+          logAuditEvent({ userId: u.id, action: 'login', resource: 'auth', status: 'success', details: 'supabase login' });
         }
         return { error: null };
       }
       const demo = DEMO_USERS[email.toLowerCase()];
       if (!demo || demo.password !== password) {
+        logAuditEvent({ action: 'login', resource: 'auth', status: 'denied', details: 'demo credentials mismatch' });
         return { error: 'Invalid credentials. Try commander@fifanexus.ai / nexus2026' };
       }
-      setUser(demo.user);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(demo.user));
+      persistUser(demo.user);
+      logAuditEvent({ userId: demo.user.id, action: 'login', resource: 'auth', status: 'success', details: 'demo login' });
       return { error: null };
+    } catch {
+      logAuditEvent({ action: 'login', resource: 'auth', status: 'error', details: 'unexpected error' });
+      return { error: 'An unexpected error occurred. Please try again.' };
     } finally {
       setLoading(false);
     }
   };
 
   const signOut = async () => {
+    if (user) {
+      logAuditEvent({ userId: user.id, action: 'logout', resource: 'auth', status: 'success', details: 'user signed out' });
+    }
     if (isSupabaseConfigured && supabase) {
       await supabase.auth.signOut();
     }
-    setUser(null);
-    localStorage.removeItem(STORAGE_KEY);
+    persistUser(null);
   };
 
   const hasRole = useCallback(

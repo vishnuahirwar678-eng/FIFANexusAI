@@ -2,8 +2,7 @@ import { useState } from 'react';
 import {
   FlaskConical, CheckCircle2, XCircle, Activity, Shield,
   Accessibility, Gauge, Zap, Brain, Radio, Clock, TrendingUp, Play,
-  RotateCcw, Users, Server, Cpu, FileText, Download, GitBranch,
-  CircleDot, AlertCircle, Terminal, Beaker, Target,
+  RotateCcw, Users, Server, Cpu,
 } from 'lucide-react';
 import { Card, CardHeader, CardBody, CardTitle } from '../ui/Card';
 import { Button, Badge } from '../ui/Button';

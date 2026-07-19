@@ -1,71 +1,34 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  Hand, Send, Mic, MapPin, Clock, CheckCircle2, AlertTriangle, Users,
-  Languages, ClipboardList, Brain, Sparkles, User,
-  TrendingUp, Award, Calendar,
+  Hand, MapPin, Clock, CheckCircle2, AlertTriangle, Users,
+  Languages, ClipboardList, Brain, Sparkles,
+  TrendingUp, Award, Calendar, Shield,
 } from 'lucide-react';
 import { Card, CardHeader, CardBody, CardTitle } from '../ui/Card';
 import { Button, Badge } from '../ui/Button';
 import { Progress } from '../ui/Progress';
+import { ChatPanel } from '../ui/ChatPanel';
 import { generateVolunteerTasks } from '../../lib/mock-data';
-import { generateVolunteerResponse, QUICK_PROMPTS, detectPromptInjection } from '../../lib/ai-agents';
+import { QUICK_PROMPTS } from '../../lib/ai-agents';
+import { useChat } from '../../hooks/useChat';
 import { useAuth } from '../../context/useAuth';
-import { cn, uid, timeAgo, statusColor } from '../../lib/utils';
-import type { ChatMessage, VolunteerTask } from '../../types';
+import { cn, timeAgo, statusColor } from '../../lib/utils';
+import type { VolunteerTask } from '../../types';
 
 export function VolunteerCopilot() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<VolunteerTask[]>(() => generateVolunteerTasks());
   const [selectedTask, setSelectedTask] = useState<VolunteerTask | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: uid('msg'),
-      role: 'assistant',
-      content: `Hello ${user?.name ?? 'Volunteer'}! I'm your Volunteer Copilot. I can help with task instructions, translation, incident reporting, and shift summaries. What do you need?`,
-      timestamp: new Date().toISOString(),
-      language: 'en',
-      agent: 'volunteer',
-      confidence: 0.98,
-    },
-  ]);
-  const [input, setInput] = useState('');
-  const [listening, setListening] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { messages, input, setInput, listening, toggleListening, injectionBlocked, send, scrollRef } = useChat({
+    agent: 'volunteer',
+    greeting: `Hello ${user?.name ?? 'Volunteer'}! I'm your Volunteer Copilot. I can help with task instructions, translation, incident reporting, and shift summaries. What do you need?`,
+    greetingConfidence: 0.98,
+  });
 
   useEffect(() => {
     setSelectedTask(tasks.find((t) => t.status === 'in-progress' || t.status === 'assigned') ?? tasks[0] ?? null);
   }, [tasks]);
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages]);
-
-  const send = (text: string) => {
-    if (!text.trim()) return;
-    if (detectPromptInjection(text)) {
-      setMessages((m) => [
-        ...m,
-        { id: uid('msg'), role: 'user', content: text, timestamp: new Date().toISOString(), language: 'en' },
-        {
-          id: uid('msg'),
-          role: 'assistant',
-          content: 'Safety guardrail: this request was flagged and logged. I only process task-related queries.',
-          timestamp: new Date().toISOString(),
-          language: 'en',
-          agent: 'volunteer',
-          confidence: 1.0,
-        },
-      ]);
-      setInput('');
-      return;
-    }
-    setMessages((m) => [...m, { id: uid('msg'), role: 'user', content: text, timestamp: new Date().toISOString(), language: 'en' }]);
-    setInput('');
-    setTimeout(() => {
-      const r = generateVolunteerResponse(text);
-      setMessages((m) => [...m, r]);
-    }, 600);
-  };
 
   const completeTask = (id: string) => {
     setTasks((ts) => ts.map((t) => (t.id === id ? { ...t, status: 'completed' } : t)));
@@ -91,6 +54,7 @@ export function VolunteerCopilot() {
           <Badge variant="success"><span className="w-1.5 h-1.5 rounded-full bg-pitch-400 animate-pulse" /> On shift</Badge>
           <Badge variant="info">{user?.name ?? 'Volunteer'}</Badge>
           <Badge variant="pitch"><Clock size={10} /> 4h 12m logged</Badge>
+          {injectionBlocked > 0 && <Badge variant="danger"><Shield size={10} /> {injectionBlocked} blocked</Badge>}
         </div>
       </div>
 
@@ -201,7 +165,7 @@ export function VolunteerCopilot() {
                     <p className="text-sm text-ink-100 font-medium">{selectedTask.zone}</p>
                   </div>
                   <div className="p-2.5 rounded-lg bg-ink-900/40">
-                    <p className="text-xs text-ink-500 flex items-center gap-1"><User size={10} /> Assigned to</p>
+                    <p className="text-xs text-ink-500 flex items-center gap-1"><Users size={10} /> Assigned to</p>
                     <p className="text-sm text-ink-100 font-medium">{selectedTask.volunteerName}</p>
                   </div>
                   <div className="p-2.5 rounded-lg bg-ink-900/40">
@@ -256,39 +220,19 @@ export function VolunteerCopilot() {
               Volunteer Copilot Chat
             </CardTitle>
           </CardHeader>
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3" role="log" aria-live="polite">
-            {messages.map((m) => (
-              <div key={m.id} className={cn('flex gap-3 animate-slide-in', m.role === 'user' ? 'flex-row-reverse' : '')}>
-                <div className={cn('w-7 h-7 rounded-lg flex items-center justify-center shrink-0', m.role === 'user' ? 'bg-ink-700 text-ink-200' : 'bg-gradient-to-br from-nexus-500 to-pitch-500 text-white')}>
-                  {m.role === 'user' ? <User className="w-3.5 h-3.5" /> : <Hand className="w-3.5 h-3.5" />}
-                </div>
-                <div className={cn('max-w-[80%]', m.role === 'user' ? 'text-right' : '')}>
-                  <div className={cn('inline-block p-2.5 rounded-2xl text-sm', m.role === 'user' ? 'bg-nexus-500/15 border border-nexus-500/30 text-ink-100 rounded-tr-sm' : 'bg-ink-900/60 border border-ink-700/50 text-ink-100 rounded-tl-sm')}>
-                    <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
-                  </div>
-                  <p className="text-[10px] text-ink-500 mt-1">{new Date(m.timestamp).toLocaleTimeString()}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="px-4 pb-2 flex flex-wrap gap-1.5">
-            {QUICK_PROMPTS['volunteer'].map((p) => (
-              <button key={p} onClick={() => send(p)} className="text-xs px-2.5 py-1 rounded-lg bg-ink-800/60 border border-ink-700 text-ink-300 hover:border-nexus-500/40 hover:text-ink-100 transition-colors">
-                {p}
-              </button>
-            ))}
-          </div>
-          <div className="p-4 border-t border-ink-700/50">
-            <div className="flex items-center gap-2">
-              <button onClick={() => setListening(!listening)} className={cn('p-2.5 rounded-xl', listening ? 'bg-alert-500/20 text-alert-300 animate-pulse' : 'bg-ink-800 text-ink-300 hover:text-ink-100')} aria-label="Voice input">
-                <Mic className="w-4 h-4" />
-              </button>
-              <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send(input)} placeholder="Ask for help..." className="flex-1 px-4 py-2.5 bg-ink-900/60 border border-ink-700 rounded-xl text-sm text-ink-50 placeholder-ink-500 focus:border-nexus-500 focus:ring-1 focus:ring-nexus-500 outline-none" />
-              <Button onClick={() => send(input)} disabled={!input.trim()}>
-                <Send size={14} />
-              </Button>
-            </div>
-          </div>
+          <ChatPanel
+            messages={messages}
+            input={input}
+            onInputChange={setInput}
+            onSend={send}
+            listening={listening}
+            onToggleListening={toggleListening}
+            quickPrompts={QUICK_PROMPTS['volunteer']}
+            agentIcon={Hand}
+            accentClass="bg-gradient-to-br from-nexus-500 to-pitch-500 text-white"
+            placeholder="Ask for help..."
+            scrollRef={scrollRef}
+          />
         </Card>
 
         {/* Shift summary */}

@@ -9,7 +9,7 @@ const PROMPT_INJECTION_PATTERNS = [
   /system prompt/i,
   /reveal (your )?instructions/i,
   /act as (a |an )?/i,
-  /forget (your )?rules/i,
+  /forget (your )?(rules|instructions)/i,
   /override (your )?/i,
   /\bDAN\b/i,
   /jailbreak/i,
@@ -106,7 +106,7 @@ const FAN_RESPONSES: Record<string, FanQuery> = {
 function matchIntent(input: string): keyof typeof FAN_RESPONSES {
   const lower = input.toLowerCase();
   if (/(restroom|toilet|bathroom|washroom|baño|toilettes|トイレ)/.test(lower)) return 'restroom';
-  if (/(food|eat|hungry|restaurant|comida|manger|食べ物)/.test(lower)) return 'food';
+  if (/(food|\beat\b|\beats\b|hungry|restaurant|comida|manger|食べ物)/.test(lower)) return 'food';
   if (/(water|drink|hydrate|agua|eau|水)/.test(lower)) return 'water';
   if (/(medical|help|emergency|doctor|ayuda|secours|医療)/.test(lower)) return 'medical';
   if (/(seat|section|row|asiento|siège|座席)/.test(lower)) return 'seat';
@@ -172,7 +172,7 @@ export function generateOpsResponse(input: string): ChatMessage {
   }
   const lower = input.toLowerCase();
   let content = '';
-  if (/(summary|summarize|brief|status)/.test(lower)) {
+  if (/(summary|summarize|brief|status)/.test(lower) && !/sustainab/.test(lower)) {
     content = `**Operations Summary — ${new Date().toLocaleTimeString()}
 
 **Attendance:** 78,432 / 88,000 (89%)

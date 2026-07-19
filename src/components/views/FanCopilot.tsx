@@ -1,94 +1,29 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import {
-  Heart, Send, Mic, Globe, Volume2, MapPin, Navigation, UtensilsCrossed,
-  Stethoscope, Bus, Accessibility, Sparkles, Shield, User,
-  Languages, AudioLines, ArrowRight, Star, Clock,
+  Heart, Globe, MapPin, Navigation, UtensilsCrossed,
+  Stethoscope, Bus, Accessibility, Sparkles, Volume2,
+  Languages, Star, Clock, Shield, ArrowRight,
 } from 'lucide-react';
 import { Card, CardHeader, CardBody, CardTitle } from '../ui/Card';
 import { Button, Badge } from '../ui/Button';
+import { ChatPanel, useSpeech } from '../ui/ChatPanel';
 import { LANGUAGES, TRANSLATIONS, ANNOUNCEMENTS } from '../../lib/mock-data';
-import { generateFanResponse, QUICK_PROMPTS, detectPromptInjection } from '../../lib/ai-agents';
-import { cn, uid } from '../../lib/utils';
-import type { ChatMessage } from '../../types';
+import { QUICK_PROMPTS } from '../../lib/ai-agents';
+import { useChat } from '../../hooks/useChat';
+import { cn } from '../../lib/utils';
 
 export function FanCopilot() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: uid('msg'),
-      role: 'assistant',
-      content: 'Welcome to FIFA World Cup 2026! I\'m your AI Fan Copilot. I can help you with navigation, food, transport, accessibility, and more — in 8 languages. How can I help you today?',
-      timestamp: new Date().toISOString(),
-      language: 'en',
-      agent: 'fan-experience',
-      confidence: 0.99,
-    },
-  ]);
-  const [input, setInput] = useState('');
   const [language, setLanguage] = useState('en');
-  const [listening, setListening] = useState(false);
   const [showLangPicker, setShowLangPicker] = useState(false);
-  const [injectionBlocked, setInjectionBlocked] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages]);
+  const { messages, input, setInput, listening, toggleListening, injectionBlocked, send, scrollRef } = useChat({
+    agent: 'fan-experience',
+    greeting: 'Welcome to FIFA World Cup 2026! I\'m your AI Fan Copilot. I can help you with navigation, food, transport, accessibility, and more — in 8 languages. How can I help you today?',
+    language,
+    greetingConfidence: 0.99,
+  });
 
-  const send = (text: string) => {
-    if (!text.trim()) return;
-    if (detectPromptInjection(text)) {
-      setInjectionBlocked((n) => n + 1);
-      setMessages((m) => [
-        ...m,
-        {
-          id: uid('msg'),
-          role: 'user',
-          content: text,
-          timestamp: new Date().toISOString(),
-          language,
-        },
-        {
-          id: uid('msg'),
-          role: 'assistant',
-          content: 'For your safety, I can\'t process that request. I\'m here to help with stadium-related queries only — navigation, food, transport, accessibility, and match info.',
-          timestamp: new Date().toISOString(),
-          language,
-          agent: 'fan-experience',
-          confidence: 1.0,
-        },
-      ]);
-      setInput('');
-      return;
-    }
-    setMessages((m) => [
-      ...m,
-      { id: uid('msg'), role: 'user', content: text, timestamp: new Date().toISOString(), language },
-    ]);
-    setInput('');
-    setTimeout(() => {
-      const response = generateFanResponse(text, language);
-      setMessages((m) => [...m, response]);
-    }, 600);
-  };
-
-  const toggleVoice = () => {
-    setListening(!listening);
-    if (!listening) {
-      setTimeout(() => {
-        setListening(false);
-        setInput('Where is the nearest restroom?');
-      }, 2000);
-    }
-  };
-
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = language;
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
+  const speak = useSpeech();
   const currentLang = LANGUAGES.find((l) => l.code === language) ?? LANGUAGES[0];
 
   return (
@@ -146,102 +81,21 @@ export function FanCopilot() {
             </div>
           </CardHeader>
 
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4" role="log" aria-live="polite">
-            {messages.map((m) => (
-              <div
-                key={m.id}
-                className={cn('flex gap-3 animate-slide-in', m.role === 'user' ? 'flex-row-reverse' : '')}
-              >
-                <div
-                  className={cn(
-                    'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
-                    m.role === 'user'
-                      ? 'bg-ink-700 text-ink-200'
-                      : 'bg-gradient-to-br from-pitch-500 to-nexus-500 text-white',
-                  )}
-                >
-                  {m.role === 'user' ? <User className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
-                </div>
-                <div className={cn('max-w-[80%]', m.role === 'user' ? 'text-right' : '')}>
-                  <div
-                    className={cn(
-                      'inline-block p-3 rounded-2xl text-sm',
-                      m.role === 'user'
-                        ? 'bg-nexus-500/15 border border-nexus-500/30 text-ink-100 rounded-tr-sm'
-                        : 'bg-ink-900/60 border border-ink-700/50 text-ink-100 rounded-tl-sm',
-                    )}
-                  >
-                    <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
-                    {m.translated && (
-                      <div className="mt-2 pt-2 border-t border-ink-700/50 text-xs text-ink-300">
-                        <p className="flex items-center gap-1 text-pitch-400 mb-1">
-                          <Languages size={10} /> {currentLang.nativeName}:
-                        </p>
-                        <p>{m.translated}</p>
-                      </div>
-                    )}
-                  </div>
-                  <div className={cn('flex items-center gap-2 mt-1 text-[10px] text-ink-500', m.role === 'user' ? 'justify-end' : '')}>
-                    <span>{new Date(m.timestamp).toLocaleTimeString()}</span>
-                    {m.confidence && <span>· {(m.confidence * 100).toFixed(1)}% confidence</span>}
-                    {m.role === 'assistant' && (
-                      <button onClick={() => speak(m.content)} className="hover:text-nexus-300" aria-label="Speak">
-                        <Volume2 size={10} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick prompts */}
-          <div className="px-4 pb-2 flex flex-wrap gap-1.5">
-            {QUICK_PROMPTS['fan-experience'].map((p) => (
-              <button
-                key={p}
-                onClick={() => send(p)}
-                className="text-xs px-2.5 py-1 rounded-lg bg-ink-800/60 border border-ink-700 text-ink-300 hover:border-pitch-500/40 hover:text-ink-100 transition-colors"
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-
-          {/* Input */}
-          <div className="p-4 border-t border-ink-700/50">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleVoice}
-                className={cn(
-                  'p-2.5 rounded-xl transition-colors',
-                  listening ? 'bg-alert-500/20 text-alert-300 animate-pulse' : 'bg-ink-800 text-ink-300 hover:text-ink-100',
-                )}
-                aria-label="Voice input"
-                aria-pressed={listening}
-              >
-                <Mic className="w-4 h-4" />
-              </button>
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && send(input)}
-                placeholder={listening ? 'Listening...' : 'Ask me anything about the stadium...'}
-                aria-label="Message input"
-                className="flex-1 px-4 py-2.5 bg-ink-900/60 border border-ink-700 rounded-xl text-sm text-ink-50 placeholder-ink-500 focus:border-pitch-500 focus:ring-1 focus:ring-pitch-500 outline-none"
-              />
-              <Button onClick={() => send(input)} disabled={!input.trim()} size="md">
-                <Send size={14} />
-              </Button>
-            </div>
-            {listening && (
-              <div className="mt-2 flex items-center gap-2 text-xs text-alert-300">
-                <AudioLines className="w-3 h-3 animate-pulse" />
-                Listening in {currentLang.nativeName}...
-              </div>
-            )}
-          </div>
+          <ChatPanel
+            messages={messages}
+            input={input}
+            onInputChange={setInput}
+            onSend={send}
+            listening={listening}
+            onToggleListening={toggleListening}
+            quickPrompts={QUICK_PROMPTS['fan-experience']}
+            agentIcon={Heart}
+            accentClass="bg-gradient-to-br from-pitch-500 to-nexus-500 text-white"
+            currentLang={currentLang}
+            onSpeak={(text) => speak(text, language)}
+            placeholder="Ask me anything about the stadium..."
+            scrollRef={scrollRef}
+          />
         </Card>
 
         {/* Side panel */}

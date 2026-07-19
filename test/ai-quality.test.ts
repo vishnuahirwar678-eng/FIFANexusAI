@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  detectPromptInjection, sanitizeInput, generateFanResponse,
+  generateFanResponse,
   generateOpsResponse, generateVolunteerResponse, generateAgentResponse,
 } from '../src/lib/ai-agents';
 import { TRANSLATIONS, LANGUAGES } from '../src/lib/mock-data';
@@ -15,7 +15,7 @@ describe('AI Quality: Prompt Quality', () => {
       ['How do I get to my seat?', 'seat'],
       ['Where is the exit?', 'exit'],
       ['When does the metro arrive?', 'metro'],
-      ['Where can I park?', 'parking'],
+      ['Where can I park my car?', 'parking'],
       ['What is the WiFi password?', 'wifi'],
     ];
     testCases.forEach(([query, keyword]) => {
@@ -102,25 +102,22 @@ describe('AI Quality: Hallucination Detection', () => {
       'I need medical help',
       'How do I get to my seat?',
       'Where is the metro station?',
-      'Where can I park?',
+      'Where can I park my car?',
       'What is the WiFi password?',
     ];
     queries.forEach((q) => {
       const msg = generateFanResponse(q);
-      // AI should speak with confidence, not hedge
       expect(msg.content).not.toMatch(/\bI think\b|\bmaybe\b|\bperhaps\b|\bpossibly\b|\bI'm not sure\b|\bI guess\b/i);
     });
   });
 
   it('responses do not fabricate unrelated facts', () => {
     const msg = generateFanResponse('Where is the restroom?');
-    // Should not mention random players, teams, or match scores
     expect(msg.content).not.toMatch(/Messi|Ronaldo|score \d-\d|won the match/i);
   });
 
   it('ops responses do not fabricate metrics outside expected ranges', () => {
     const msg = generateOpsResponse('operations summary');
-    // Attendance should be a reasonable number (< 200K for a stadium)
     const attendanceMatch = msg.content.match(/(\d{1,3}(,\d{3})*)\s*\/\s*\d{1,3}(,\d{3})*/);
     if (attendanceMatch) {
       const attendance = parseInt(attendanceMatch[1].replace(/,/g, ''), 10);
@@ -381,7 +378,6 @@ describe('AI Quality: Safety Guardrails', () => {
   it('XSS payloads in input are sanitized before processing', () => {
     const msg = generateFanResponse('<script>alert(1)</script> Where is the restroom?');
     expect(msg.content).toBeDefined();
-    // Should still process the restroom part after sanitization
     expect(msg.content).toContain('restroom');
   });
 

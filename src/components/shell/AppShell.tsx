@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { useInterval } from '../../hooks/useInterval';
 import {
   Activity, LayoutDashboard, Boxes, Heart, Users, Hand, Bus, Leaf,
   ShieldCheck, FlaskConical, Menu, X, Bell, Search, Globe,
@@ -76,10 +77,7 @@ export function AppShell({ current, onNavigate, onExit, children }: AppShellProp
   const [showNotifs, setShowNotifs] = useState(false);
   const [time, setTime] = useState(new Date());
 
-  useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
+  useInterval(() => setTime(new Date()), 1000);
 
   useEffect(() => {
     document.documentElement.classList.toggle('high-contrast', highContrast);
